@@ -1,8 +1,9 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel
 
-from app.models import UserRole
+from app.models import TahminDurum, UserRole
 
 
 class LoginRequest(BaseModel):
@@ -44,3 +45,20 @@ class PredictionOut(BaseModel):
     ariza_tipi: str
     risk_uyarisi: bool
     gerekce: list[ReasonOut]
+
+
+class TahminCreateIn(BaseModel):
+    makine_id: int
+    sensor: SensorReadingIn
+
+
+class TahminOut(BaseModel):
+    id: int
+    makine_id: int
+    makine_kodu: str
+    risk_orani: float
+    ariza_tipi: str
+    gerekce: list[ReasonOut]
+    oncelik: int
+    durum: TahminDurum
+    created_at: datetime
