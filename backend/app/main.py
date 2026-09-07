@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, is_emirleri, predictions, tahminler
+from app.routers import admin, auth, is_emirleri, predictions, tahminler
 
 app = FastAPI(title="MaintiFlow API")
 
@@ -17,6 +17,7 @@ app.include_router(auth.router)
 app.include_router(predictions.router)
 app.include_router(tahminler.router)
 app.include_router(is_emirleri.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")

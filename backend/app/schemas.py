@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.models import IsEmriDurum, TahminDurum, UserRole
+from app.models import IsEmriDurum, TahminDurum, UserRole, UserStatus
 
 
 class LoginRequest(BaseModel):
@@ -77,3 +77,60 @@ class IsEmriOut(BaseModel):
     durum: IsEmriDurum
     onaylayan_user_id: int
     created_at: datetime
+
+
+class MakineOut(BaseModel):
+    id: int
+    makine_kodu: str
+    ad: str
+    tip: str
+    kritiklik: int
+
+    class Config:
+        from_attributes = True
+
+
+class MakineUpdateIn(BaseModel):
+    kritiklik: int
+
+
+class StokOut(BaseModel):
+    id: int
+    parca_kodu: str
+    ad: str
+    adet: int
+    tedarik_gun: int
+
+    class Config:
+        from_attributes = True
+
+
+class StokUpdateIn(BaseModel):
+    adet: int | None = None
+    tedarik_gun: int | None = None
+
+
+class LogOut(BaseModel):
+    id: int
+    makine_kodu: str
+    risk_orani: float
+    ariza_tipi: str
+    oncelik: int
+    durum: TahminDurum
+    created_at: datetime
+    karar_veren_username: str | None = None
+    karar_tarihi: datetime | None = None
+
+
+class UserCreateIn(BaseModel):
+    username: str
+    password: str
+    role: UserRole = UserRole.user
+
+
+class PasswordUpdateIn(BaseModel):
+    password: str
+
+
+class StatusUpdateIn(BaseModel):
+    status: UserStatus
