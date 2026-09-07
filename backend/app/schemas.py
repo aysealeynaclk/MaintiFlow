@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.models import TahminDurum, UserRole
+from app.models import IsEmriDurum, TahminDurum, UserRole
 
 
 class LoginRequest(BaseModel):
@@ -61,4 +61,19 @@ class TahminOut(BaseModel):
     gerekce: list[ReasonOut]
     oncelik: int
     durum: TahminDurum
+    created_at: datetime
+    karar_veren_user_id: int | None = None
+    karar_tarihi: datetime | None = None
+
+
+class IsEmriOut(BaseModel):
+    id: int
+    tahmin_id: int
+    makine_id: int
+    makine_kodu: str
+    aksiyon: str
+    parca_kodu: str
+    oncelik: int
+    durum: IsEmriDurum
+    onaylayan_user_id: int
     created_at: datetime

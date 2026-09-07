@@ -103,6 +103,8 @@ class Tahmin(Base):
     oncelik: Mapped[int] = mapped_column(Integer, nullable=False)
     durum: Mapped[TahminDurum] = mapped_column(Enum(TahminDurum), nullable=False, default=TahminDurum.bekliyor)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    karar_veren_user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    karar_tarihi: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (CheckConstraint("oncelik BETWEEN 1 AND 5", name="ck_tahmin_oncelik_range"),)
 
