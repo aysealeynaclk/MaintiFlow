@@ -20,6 +20,7 @@ class UserOut(BaseModel):
     id: int
     username: str
     role: UserRole
+    status: UserStatus
 
     class Config:
         from_attributes = True
@@ -64,6 +65,10 @@ class TahminOut(BaseModel):
     created_at: datetime
     karar_veren_user_id: int | None = None
     karar_tarihi: datetime | None = None
+    onerilen_aksiyon: str | None = None
+    parca_kodu: str | None = None
+    parca_adi: str | None = None
+    stok_adet: int | None = None
 
 
 class IsEmriOut(BaseModel):

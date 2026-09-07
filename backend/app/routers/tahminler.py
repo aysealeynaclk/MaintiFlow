@@ -13,7 +13,18 @@ from app.schemas import IsEmriOut, TahminCreateIn, TahminOut
 router = APIRouter(prefix="/tahminler", tags=["tahminler"])
 
 
-def _to_out(tahmin: Tahmin) -> TahminOut:
+def _to_out(tahmin: Tahmin, db: Session | None = None) -> TahminOut:
+    onerilen_aksiyon = parca_kodu = parca_adi = None
+    stok_adet = None
+    if db is not None:
+        ariza_parca = db.query(ArizaParca).filter(ArizaParca.ariza_tipi == tahmin.ariza_tipi).first()
+        if ariza_parca is not None:
+            onerilen_aksiyon = ariza_parca.onerilen_aksiyon
+            parca_kodu = ariza_parca.parca_kodu
+            if ariza_parca.stok is not None:
+                parca_adi = ariza_parca.stok.ad
+                stok_adet = ariza_parca.stok.adet
+
     return TahminOut(
         id=tahmin.id,
         makine_id=tahmin.makine_id,
@@ -26,6 +37,10 @@ def _to_out(tahmin: Tahmin) -> TahminOut:
         created_at=tahmin.created_at,
         karar_veren_user_id=tahmin.karar_veren_user_id,
         karar_tarihi=tahmin.karar_tarihi,
+        onerilen_aksiyon=onerilen_aksiyon,
+        parca_kodu=parca_kodu,
+        parca_adi=parca_adi,
+        stok_adet=stok_adet,
     )
 
 
@@ -101,7 +116,7 @@ def get_tahmin(
     tahmin = db.get(Tahmin, tahmin_id)
     if tahmin is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tahmin bulunamadi")
-    return _to_out(tahmin)
+    return _to_out(tahmin, db)
 
 
 @router.post("/{tahmin_id}/onayla", response_model=IsEmriOut)
@@ -165,4 +180,4 @@ def reddet(
     db.commit()
     db.refresh(tahmin)
 
-    return _to_out(tahmin)
+    return _to_out(tahmin, db)
