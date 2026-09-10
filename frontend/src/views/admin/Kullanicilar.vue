@@ -11,7 +11,8 @@ const yeniKullanici = reactive({ username: '', password: '', role: 'user' })
 const olusturHata = ref('')
 const olusturuluyor = ref(false)
 
-const sifreDurumu = reactive({}) // { [userId]: { deger, hata, kaydediliyor } }
+const sifirlananSifre = ref(null) // { username, sifre }
+const islemDurumu = reactive({}) // { [userId]: { sifirlaniyor, siliniyor, hata } }
 
 async function yukle() {
   yukleniyor.value = true
@@ -20,7 +21,7 @@ async function yukle() {
     const { data } = await client.get('/admin/kullanicilar')
     kullanicilar.value = data
     data.forEach((u) => {
-      if (!sifreDurumu[u.id]) sifreDurumu[u.id] = { deger: '', hata: '', kaydediliyor: false }
+      if (!islemDurumu[u.id]) islemDurumu[u.id] = { sifirlaniyor: false, siliniyor: false, hata: '' }
     })
   } catch (err) {
     hata.value = getErrorMessage(err, 'Kullanıcılar yüklenemedi.')
@@ -45,17 +46,17 @@ async function kullaniciOlustur() {
   }
 }
 
-async function sifreGuncelle(userId) {
-  const durum = sifreDurumu[userId]
-  durum.hata = ''
-  durum.kaydediliyor = true
+async function sifreSifirla(kullanici) {
+  const d = islemDurumu[kullanici.id]
+  d.hata = ''
+  d.sifirlaniyor = true
   try {
-    await client.patch(`/admin/kullanicilar/${userId}/sifre`, { password: durum.deger })
-    durum.deger = ''
+    const { data } = await client.post(`/admin/kullanicilar/${kullanici.id}/sifre-sifirla`)
+    sifirlananSifre.value = { username: kullanici.username, sifre: data.yeni_sifre }
   } catch (err) {
-    durum.hata = getErrorMessage(err, 'Şifre güncellenemedi.')
+    d.hata = getErrorMessage(err, 'Şifre sıfırlanamadı.')
   } finally {
-    durum.kaydediliyor = false
+    d.sifirlaniyor = false
   }
 }
 
@@ -70,12 +71,39 @@ async function durumDegistir(kullanici) {
   }
 }
 
+async function kullaniciSil(kullanici) {
+  if (!confirm(`"${kullanici.username}" kullanıcısını kalıcı olarak silmek istediğinize emin misiniz?`)) return
+  const d = islemDurumu[kullanici.id]
+  d.hata = ''
+  d.siliniyor = true
+  try {
+    await client.delete(`/admin/kullanicilar/${kullanici.id}`)
+    await yukle()
+  } catch (err) {
+    d.hata = getErrorMessage(err, 'Kullanıcı silinemedi.')
+  } finally {
+    d.siliniyor = false
+  }
+}
+
 onMounted(yukle)
 </script>
 
 <template>
   <div class="space-y-6">
     <h1 class="text-xl font-semibold text-slate-900 dark:text-white">Kullanıcı Yönetimi</h1>
+
+    <div
+      v-if="sifirlananSifre"
+      class="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800 dark:bg-amber-900/30"
+    >
+      <span class="text-amber-900 dark:text-amber-200">
+        <strong>{{ sifirlananSifre.username }}</strong> için yeni şifre:
+        <code class="rounded bg-white px-2 py-0.5 font-mono dark:bg-slate-900">{{ sifirlananSifre.sifre }}</code>
+        — bu şifre bir daha gösterilmeyecek, kullanıcıya iletin.
+      </span>
+      <button @click="sifirlananSifre = null" class="text-amber-700 hover:text-amber-900 dark:text-amber-300">✕</button>
+    </div>
 
     <form @submit.prevent="kullaniciOlustur" class="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
       <div>
@@ -109,7 +137,6 @@ onMounted(yukle)
             <th class="px-4 py-2">Kullanıcı adı</th>
             <th class="px-4 py-2">Rol</th>
             <th class="px-4 py-2">Durum</th>
-            <th class="px-4 py-2">Yeni şifre</th>
             <th class="px-4 py-2"></th>
           </tr>
         </thead>
@@ -127,30 +154,30 @@ onMounted(yukle)
             </td>
             <td class="px-4 py-2">
               <div class="flex items-center gap-2">
-                <input
-                  v-model="sifreDurumu[u.id].deger"
-                  type="password"
-                  placeholder="••••••"
-                  class="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
                 <button
-                  @click="sifreGuncelle(u.id)"
-                  :disabled="!sifreDurumu[u.id].deger || sifreDurumu[u.id].kaydediliyor"
-                  class="rounded-md bg-slate-100 px-2 py-1 text-xs hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  @click="sifreSifirla(u)"
+                  :disabled="islemDurumu[u.id]?.sifirlaniyor"
+                  class="rounded-md bg-slate-100 px-3 py-1 text-xs hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
                 >
-                  Güncelle
+                  Şifreyi Sıfırla
+                </button>
+                <button
+                  v-if="!(u.id === auth.user?.id && u.status === 'active')"
+                  @click="durumDegistir(u)"
+                  class="rounded-md bg-slate-100 px-3 py-1 text-xs hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
+                >
+                  {{ u.status === 'active' ? 'Pasife Al' : 'Aktif Et' }}
+                </button>
+                <button
+                  v-if="u.status === 'inactive' && u.id !== auth.user?.id"
+                  @click="kullaniciSil(u)"
+                  :disabled="islemDurumu[u.id]?.siliniyor"
+                  class="rounded-md bg-red-50 px-3 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
+                >
+                  Sil
                 </button>
               </div>
-              <p v-if="sifreDurumu[u.id]?.hata" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ sifreDurumu[u.id].hata }}</p>
-            </td>
-            <td class="px-4 py-2">
-              <button
-                v-if="!(u.id === auth.user?.id && u.status === 'active')"
-                @click="durumDegistir(u)"
-                class="rounded-md bg-slate-100 px-3 py-1 text-xs hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
-              >
-                {{ u.status === 'active' ? 'Pasife Al' : 'Aktif Et' }}
-              </button>
+              <p v-if="islemDurumu[u.id]?.hata" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ islemDurumu[u.id].hata }}</p>
             </td>
           </tr>
         </tbody>

@@ -1,11 +1,29 @@
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth } from '../stores/auth'
 import { theme } from '../stores/theme'
 
 const router = useRouter()
 
+const menuAcik = ref(false)
+const menuRef = ref(null)
+
+const initialler = computed(() => (auth.user?.username || '?').slice(0, 2).toUpperCase())
+
+function disaTikla(e) {
+  if (menuRef.value && !menuRef.value.contains(e.target)) menuAcik.value = false
+}
+onMounted(() => document.addEventListener('click', disaTikla))
+onUnmounted(() => document.removeEventListener('click', disaTikla))
+
+function profileGit() {
+  menuAcik.value = false
+  router.push('/profil')
+}
+
 function cikisYap() {
+  menuAcik.value = false
   auth.clearSession()
   router.push('/login')
 }
@@ -53,11 +71,29 @@ function cikisYap() {
         {{ theme.dark ? '☀️ Açık' : '🌙 Koyu' }}
       </button>
 
-      <div class="flex items-center gap-3 text-sm">
-        <span class="text-slate-500 dark:text-slate-400">{{ auth.user?.username }}</span>
-        <button @click="cikisYap" class="rounded-md bg-slate-100 px-3 py-1 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-          Çıkış
+      <div ref="menuRef" class="relative">
+        <button
+          @click="menuAcik = !menuAcik"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-semibold text-white hover:bg-sky-700"
+        >
+          {{ initialler }}
         </button>
+
+        <div
+          v-if="menuAcik"
+          class="absolute right-0 z-10 mt-2 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+        >
+          <div class="border-b border-slate-100 px-4 py-2 text-sm dark:border-slate-700">
+            <p class="font-medium text-slate-900 dark:text-white">{{ auth.user?.username }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ auth.user?.role }}</p>
+          </div>
+          <button @click="profileGit" class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
+            Profilim
+          </button>
+          <button @click="cikisYap" class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
+            Çıkış Yap
+          </button>
+        </div>
       </div>
     </div>
   </nav>

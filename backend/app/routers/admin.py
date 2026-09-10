@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -8,14 +9,14 @@ from app.schemas import (
     LogOut,
     MakineOut,
     MakineUpdateIn,
-    PasswordUpdateIn,
+    PasswordResetOut,
     StatusUpdateIn,
     StokOut,
     StokUpdateIn,
     UserCreateIn,
     UserOut,
 )
-from app.security import hash_password
+from app.security import generate_random_password, hash_password
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 
@@ -113,15 +114,17 @@ def create_kullanici(payload: UserCreateIn, db: Session = Depends(get_db)):
     return user
 
 
-@router.patch("/kullanicilar/{user_id}/sifre", response_model=UserOut)
-def update_sifre(user_id: int, payload: PasswordUpdateIn, db: Session = Depends(get_db)):
+@router.post("/kullanicilar/{user_id}/sifre-sifirla", response_model=PasswordResetOut)
+def sifre_sifirla(user_id: int, db: Session = Depends(get_db)):
+    """Admin bir sifre SECMEZ, sistem rastgele bir sifre uretir - bir kereligine
+    gosterilir, kullaniciya admin tarafindan iletilmesi gerekir."""
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Kullanici bulunamadi")
-    user.password_hash = hash_password(payload.password)
+    yeni_sifre = generate_random_password()
+    user.password_hash = hash_password(yeni_sifre)
     db.commit()
-    db.refresh(user)
-    return user
+    return PasswordResetOut(yeni_sifre=yeni_sifre)
 
 
 @router.patch("/kullanicilar/{user_id}/durum", response_model=UserOut)
@@ -140,3 +143,28 @@ def update_durum(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.delete("/kullanicilar/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_kullanici(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Kullanici bulunamadi")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Kendi hesabinizi silemezsiniz")
+    if user.status != UserStatus.inactive:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Once kullaniciyi pasife almalisiniz")
+
+    try:
+        db.delete(user)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Bu kullanici onayladigi/reddettigi kayitlar oldugu icin silinemez",
+        )

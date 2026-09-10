@@ -140,9 +140,15 @@ class UserCreateIn(BaseModel):
     role: UserRole = UserRole.user
 
 
-class PasswordUpdateIn(BaseModel):
-    password: str
-
-
 class StatusUpdateIn(BaseModel):
     status: UserStatus
+
+
+class PasswordResetOut(BaseModel):
+    yeni_sifre: str
+
+
+class MeUpdateIn(BaseModel):
+    current_password: str
+    new_username: str | None = None
+    new_password: str | None = None

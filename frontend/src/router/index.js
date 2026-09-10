@@ -5,6 +5,7 @@ import Login from '../views/Login.vue'
 import RiskListesi from '../views/RiskListesi.vue'
 import Detay from '../views/Detay.vue'
 import IsEmirleri from '../views/IsEmirleri.vue'
+import Profil from '../views/Profil.vue'
 import AdminMakineler from '../views/admin/Makineler.vue'
 import AdminStok from '../views/admin/Stok.vue'
 import AdminLoglar from '../views/admin/Loglar.vue'
@@ -15,6 +16,7 @@ const routes = [
   { path: '/', name: 'risk-listesi', component: RiskListesi },
   { path: '/tahmin/:id', name: 'detay', component: Detay, props: true },
   { path: '/is-emirleri', name: 'is-emirleri', component: IsEmirleri },
+  { path: '/profil', name: 'profil', component: Profil },
   { path: '/admin/makineler', name: 'admin-makineler', component: AdminMakineler, meta: { admin: true } },
   { path: '/admin/stok', name: 'admin-stok', component: AdminStok, meta: { admin: true } },
   { path: '/admin/loglar', name: 'admin-loglar', component: AdminLoglar, meta: { admin: true } },
