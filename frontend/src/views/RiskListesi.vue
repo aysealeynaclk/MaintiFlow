@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import client, { getErrorMessage } from '../api/client'
 
 const tahminler = ref([])
@@ -20,8 +20,8 @@ function oncelikRenk(oncelik) {
   return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
 }
 
-async function yukle() {
-  yukleniyor.value = true
+async function yukle(sessiz = false) {
+  if (!sessiz) yukleniyor.value = true
   hata.value = ''
   try {
     const params = durum.value ? { durum: durum.value } : {}
@@ -34,8 +34,14 @@ async function yukle() {
   }
 }
 
-onMounted(yukle)
-watch(durum, yukle)
+let zamanlayici = null
+onMounted(() => {
+  yukle()
+  // Canli akis hissi: yeni tahminler geldikce liste sessizce kendini yeniler.
+  zamanlayici = setInterval(() => yukle(true), 3000)
+})
+onUnmounted(() => clearInterval(zamanlayici))
+watch(durum, () => yukle())
 </script>
 
 <template>
