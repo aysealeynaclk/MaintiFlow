@@ -71,6 +71,13 @@ class TahminOut(BaseModel):
     stok_adet: int | None = None
 
 
+class TahminListResponse(BaseModel):
+    items: list[TahminOut]
+    total: int
+    page: int
+    page_size: int
+
+
 class IsEmriOut(BaseModel):
     id: int
     tahmin_id: int

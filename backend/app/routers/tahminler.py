@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import ml_model
@@ -8,7 +8,7 @@ from app.database import get_db
 from app.deps import get_current_user
 from app.models import ArizaParca, IsEmri, IsEmriDurum, Makine, Tahmin, TahminDurum, User
 from app.priority import compute_oncelik, stok_katsayisi
-from app.schemas import IsEmriOut, TahminCreateIn, TahminOut
+from app.schemas import IsEmriOut, TahminCreateIn, TahminListResponse, TahminOut
 
 router = APIRouter(prefix="/tahminler", tags=["tahminler"])
 
@@ -94,17 +94,34 @@ def create_tahmin(
     return _to_out(tahmin)
 
 
-@router.get("", response_model=list[TahminOut])
+@router.get("", response_model=TahminListResponse)
 def list_tahminler(
     durum: TahminDurum | None = None,
+    makine_kodu: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Tahmin)
+    query = db.query(Tahmin).join(Makine)
     if durum is not None:
         query = query.filter(Tahmin.durum == durum)
-    tahminler = query.order_by(Tahmin.oncelik.desc(), Tahmin.risk_orani.desc()).all()
-    return [_to_out(t) for t in tahminler]
+    if makine_kodu:
+        query = query.filter(Makine.makine_kodu.ilike(f"%{makine_kodu}%"))
+
+    total = query.count()
+    tahminler = (
+        query.order_by(Tahmin.oncelik.desc(), Tahmin.risk_orani.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+    return TahminListResponse(
+        items=[_to_out(t) for t in tahminler],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{tahmin_id}", response_model=TahminOut)
