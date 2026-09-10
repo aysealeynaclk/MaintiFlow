@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import client, { getErrorMessage } from '../api/client'
 import { auth } from '../stores/auth'
+import { t } from '../stores/i18n'
 
 const yeniKullaniciAdi = ref(auth.user?.username || '')
 const mevcutSifre = ref('')
@@ -86,15 +87,15 @@ async function kaydet() {
           {{ auth.user?.username }}
           <span class="h-2 w-2 rounded-full bg-emerald-500" title="Aktif"></span>
         </p>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Rol: {{ auth.user?.role }}</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('rol') }}: {{ auth.user?.role }}</p>
       </div>
     </div>
 
     <form @submit.prevent="kaydet" class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-      <h2 class="font-medium text-slate-900 dark:text-white">Profil Bilgileri</h2>
+      <h2 class="font-medium text-slate-900 dark:text-white">{{ t('profilBilgileri') }}</h2>
 
       <div>
-        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">Kullanıcı adı</label>
+        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">{{ t('kullaniciAdi') }}</label>
         <input
           v-model="yeniKullaniciAdi"
           type="text"
@@ -103,7 +104,7 @@ async function kaydet() {
       </div>
 
       <div>
-        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">Yeni şifre (opsiyonel)</label>
+        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">{{ t('yeniSifreOpsiyonel') }}</label>
         <div class="relative">
           <input
             v-model="yeniSifre"
@@ -111,7 +112,7 @@ async function kaydet() {
             class="w-full rounded-md border border-slate-300 px-3 py-2 pr-16 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
           <button type="button" @click="yeniGoster = !yeniGoster" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400">
-            {{ yeniGoster ? 'Gizle' : 'Göster' }}
+            {{ yeniGoster ? t('gizle') : t('goster') }}
           </button>
         </div>
 
@@ -124,7 +125,7 @@ async function kaydet() {
       </div>
 
       <div v-if="yeniSifre">
-        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">Yeni şifre (tekrar)</label>
+        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">{{ t('yeniSifreTekrar') }}</label>
         <input
           v-model="yeniSifreTekrar"
           :type="yeniGoster ? 'text' : 'password'"
@@ -133,7 +134,7 @@ async function kaydet() {
       </div>
 
       <div class="border-t border-slate-100 pt-4 dark:border-slate-800">
-        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">Mevcut şifre (onay için gerekli)</label>
+        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">{{ t('mevcutSifreOnay') }}</label>
         <div class="relative">
           <input
             v-model="mevcutSifre"
@@ -142,7 +143,7 @@ async function kaydet() {
             class="w-full rounded-md border border-slate-300 px-3 py-2 pr-16 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
           <button type="button" @click="mevcutGoster = !mevcutGoster" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400">
-            {{ mevcutGoster ? 'Gizle' : 'Göster' }}
+            {{ mevcutGoster ? t('gizle') : t('goster') }}
           </button>
         </div>
       </div>
@@ -155,7 +156,7 @@ async function kaydet() {
         :disabled="kaydediliyor"
         class="w-full rounded-md bg-sky-600 py-2 font-medium text-white hover:bg-sky-700 disabled:opacity-60"
       >
-        {{ kaydediliyor ? 'Kaydediliyor...' : 'Kaydet' }}
+        {{ kaydediliyor ? t('kaydediliyor') : t('kaydet') }}
       </button>
     </form>
   </div>

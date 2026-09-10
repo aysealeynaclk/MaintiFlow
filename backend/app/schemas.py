@@ -21,6 +21,7 @@ class UserOut(BaseModel):
     username: str
     role: UserRole
     status: UserStatus
+    created_at: datetime
 
     class Config:
         from_attributes = True

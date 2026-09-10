@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth } from '../stores/auth'
 import { theme } from '../stores/theme'
+import { i18n, t } from '../stores/i18n'
 
 const router = useRouter()
 
@@ -37,39 +38,32 @@ function cikisYap() {
       <div class="flex flex-1 gap-4 text-sm">
         <RouterLink to="/" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           active-class="font-semibold text-sky-600 dark:text-sky-400">
-          Risk Listesi
+          {{ t('riskListesi') }}
         </RouterLink>
         <RouterLink to="/is-emirleri" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           active-class="font-semibold text-sky-600 dark:text-sky-400">
-          İş Emirleri
+          {{ t('isEmirleri') }}
         </RouterLink>
         <template v-if="auth.isAdmin">
           <span class="text-slate-300 dark:text-slate-700">|</span>
           <RouterLink to="/admin/makineler" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
             active-class="font-semibold text-sky-600 dark:text-sky-400">
-            Makineler
+            {{ t('makineler') }}
           </RouterLink>
           <RouterLink to="/admin/stok" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
             active-class="font-semibold text-sky-600 dark:text-sky-400">
-            Stok
+            {{ t('stok') }}
           </RouterLink>
           <RouterLink to="/admin/loglar" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
             active-class="font-semibold text-sky-600 dark:text-sky-400">
-            Loglar
+            {{ t('loglar') }}
           </RouterLink>
           <RouterLink to="/admin/kullanicilar" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
             active-class="font-semibold text-sky-600 dark:text-sky-400">
-            Kullanıcılar
+            {{ t('kullanicilar') }}
           </RouterLink>
         </template>
       </div>
-
-      <button
-        @click="theme.toggle()"
-        class="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-      >
-        {{ theme.dark ? '☀️ Açık' : '🌙 Koyu' }}
-      </button>
 
       <div ref="menuRef" class="relative">
         <button
@@ -81,18 +75,74 @@ function cikisYap() {
 
         <div
           v-if="menuAcik"
-          class="absolute right-0 z-10 mt-2 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          class="absolute right-0 z-10 mt-2 w-64 rounded-lg border border-slate-200 bg-white py-2 shadow-lg dark:border-slate-700 dark:bg-slate-800"
         >
-          <div class="border-b border-slate-100 px-4 py-2 text-sm dark:border-slate-700">
-            <p class="font-medium text-slate-900 dark:text-white">{{ auth.user?.username }}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400">{{ auth.user?.role }}</p>
+          <div class="flex items-center gap-3 px-4 py-2">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-600 text-sm font-semibold text-white">
+              {{ initialler }}
+            </div>
+            <div>
+              <p class="font-medium text-slate-900 dark:text-white">{{ auth.user?.username }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">{{ auth.user?.role }}</p>
+            </div>
           </div>
-          <button @click="profileGit" class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
-            Profilim
-          </button>
-          <button @click="cikisYap" class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
-            Çıkış Yap
-          </button>
+
+          <div class="border-t border-slate-100 px-4 py-2.5 dark:border-slate-700">
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                <span>☀️</span> {{ t('gorunum') }}
+              </span>
+              <div class="flex rounded-full border border-slate-300 p-0.5 text-xs dark:border-slate-600">
+                <button
+                  @click="theme.dark = false"
+                  class="rounded-full px-3 py-1"
+                  :class="!theme.dark ? 'bg-sky-600 text-white' : 'text-slate-500 dark:text-slate-400'"
+                >
+                  {{ t('acik') }}
+                </button>
+                <button
+                  @click="theme.dark = true"
+                  class="rounded-full px-3 py-1"
+                  :class="theme.dark ? 'bg-sky-600 text-white' : 'text-slate-500 dark:text-slate-400'"
+                >
+                  {{ t('koyu') }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-4 py-2.5">
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                <span>🌐</span> {{ t('dil') }}
+              </span>
+              <div class="flex rounded-full border border-slate-300 p-0.5 text-xs dark:border-slate-600">
+                <button
+                  @click="i18n.setLocale('tr')"
+                  class="rounded-full px-3 py-1"
+                  :class="i18n.locale === 'tr' ? 'bg-sky-600 text-white' : 'text-slate-500 dark:text-slate-400'"
+                >
+                  TR
+                </button>
+                <button
+                  @click="i18n.setLocale('en')"
+                  class="rounded-full px-3 py-1"
+                  :class="i18n.locale === 'en' ? 'bg-sky-600 text-white' : 'text-slate-500 dark:text-slate-400'"
+                >
+                  EN
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100 dark:border-slate-700">
+            <button @click="profileGit" class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
+              <span>👤</span> {{ t('profilim') }}
+            </button>
+            <button @click="cikisYap" class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
+              <span>🚪</span> {{ t('cikisYap') }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
