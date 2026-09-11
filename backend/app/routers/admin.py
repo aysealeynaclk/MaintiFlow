@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import require_admin
-from app.models import Makine, Stok, Tahmin, User, UserRole, UserStatus
+from app.models import IsEmri, IsEmriDurum, Makine, Stok, Tahmin, TahminDurum, User, UserRole, UserStatus
 from app.schemas import (
+    KullaniciIstatistikOut,
     LogOut,
     MakineOut,
     MakineUpdateIn,
@@ -95,6 +96,39 @@ def list_loglar(db: Session = Depends(get_db)):
 @router.get("/kullanicilar", response_model=list[UserOut])
 def list_kullanicilar(db: Session = Depends(get_db)):
     return db.query(User).order_by(User.username).all()
+
+
+@router.get("/kullanicilar/{user_id}/istatistik", response_model=KullaniciIstatistikOut)
+def kullanici_istatistik(user_id: int, db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Kullanici bulunamadi")
+
+    onaylanan_tahmin = (
+        db.query(Tahmin)
+        .filter(Tahmin.karar_veren_user_id == user_id, Tahmin.durum == TahminDurum.onaylandi)
+        .count()
+    )
+    reddedilen_tahmin = (
+        db.query(Tahmin)
+        .filter(Tahmin.karar_veren_user_id == user_id, Tahmin.durum == TahminDurum.reddedildi)
+        .count()
+    )
+
+    is_emirleri = db.query(IsEmri).filter(IsEmri.onaylayan_user_id == user_id)
+    toplam_is_emri = is_emirleri.count()
+    tamamlanan_is_emri = is_emirleri.filter(IsEmri.durum == IsEmriDurum.tamamlandi).count()
+    iptal_edilen_is_emri = is_emirleri.filter(IsEmri.durum == IsEmriDurum.iptal).count()
+    bekleyen_is_emri = is_emirleri.filter(IsEmri.durum == IsEmriDurum.bekliyor).count()
+
+    return KullaniciIstatistikOut(
+        onaylanan_tahmin=onaylanan_tahmin,
+        reddedilen_tahmin=reddedilen_tahmin,
+        toplam_is_emri=toplam_is_emri,
+        tamamlanan_is_emri=tamamlanan_is_emri,
+        iptal_edilen_is_emri=iptal_edilen_is_emri,
+        bekleyen_is_emri=bekleyen_is_emri,
+    )
 
 
 @router.post("/kullanicilar", response_model=UserOut, status_code=status.HTTP_201_CREATED)

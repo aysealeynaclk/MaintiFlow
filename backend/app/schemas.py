@@ -149,6 +149,15 @@ class PasswordResetOut(BaseModel):
     yeni_sifre: str
 
 
+class KullaniciIstatistikOut(BaseModel):
+    onaylanan_tahmin: int
+    reddedilen_tahmin: int
+    toplam_is_emri: int
+    tamamlanan_is_emri: int
+    iptal_edilen_is_emri: int
+    bekleyen_is_emri: int
+
+
 class MeUpdateIn(BaseModel):
     current_password: str
     new_username: str | None = None

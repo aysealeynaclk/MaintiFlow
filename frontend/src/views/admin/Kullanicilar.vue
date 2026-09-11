@@ -2,6 +2,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import client, { getErrorMessage } from '../../api/client'
 import { t } from '../../stores/i18n'
+import KullaniciIstatistikModal from '../../components/KullaniciIstatistikModal.vue'
+
+const secilenKullanici = ref(null) // { id, username }
 
 const SAYFA_BOYUTU = 20
 
@@ -210,13 +213,13 @@ onMounted(yukle)
           </thead>
           <tbody>
             <tr v-for="u in sayfalanmis" :key="u.id" class="border-t border-slate-200 dark:border-slate-800">
-              <td class="px-4 py-3">
+              <td class="cursor-pointer px-4 py-3" @click="secilenKullanici = { id: u.id, username: u.username }" :title="t('kullaniciIstatistigi')">
                 <div class="flex items-center gap-3">
                   <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-600 text-xs font-semibold text-white">
                     {{ initialler(u.username) }}
                   </div>
                   <div>
-                    <p class="font-medium text-slate-900 dark:text-white">{{ u.username }}</p>
+                    <p class="font-medium text-slate-900 hover:underline dark:text-white">{{ u.username }}</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">{{ u.role }}</p>
                   </div>
                 </div>
@@ -288,5 +291,12 @@ onMounted(yukle)
         </div>
       </div>
     </template>
+
+    <KullaniciIstatistikModal
+      v-if="secilenKullanici"
+      :id="secilenKullanici.id"
+      :username="secilenKullanici.username"
+      @kapat="secilenKullanici = null"
+    />
   </div>
 </template>

@@ -123,6 +123,15 @@ const dict = {
     aktifEt: 'Aktif Et',
     sil: 'Sil',
     adminKorunuyor: 'admin hesabı korunuyor',
+
+    // Kullanici istatistigi
+    kullaniciIstatistigi: 'Kullanıcı İstatistiği',
+    onaylananTahmin: 'Onaylanan Tahmin',
+    reddedilenTahmin: 'Reddedilen Tahmin',
+    toplamIsEmri: 'Toplam İş Emri',
+    tamamlananIsEmri: 'Tamamlanan',
+    iptalEdilenIsEmri: 'İptal Edilen',
+    bekleyenIsEmri: 'Bekleyen',
   },
   en: {
     riskListesi: 'Risk List',
@@ -222,6 +231,14 @@ const dict = {
     aktifEt: 'Activate',
     sil: 'Delete',
     adminKorunuyor: 'admin account protected',
+
+    kullaniciIstatistigi: 'User Statistics',
+    onaylananTahmin: 'Approved Predictions',
+    reddedilenTahmin: 'Rejected Predictions',
+    toplamIsEmri: 'Total Work Orders',
+    tamamlananIsEmri: 'Completed',
+    iptalEdilenIsEmri: 'Cancelled',
+    bekleyenIsEmri: 'Pending',
   },
 }
 
