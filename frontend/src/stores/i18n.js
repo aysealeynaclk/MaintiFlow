@@ -65,6 +65,10 @@ const dict = {
     durumOnaylananlar: 'Onaylananlar',
     durumReddedilenler: 'Reddedilenler',
     durumTumu: 'Tümü',
+    durumTamamlandi: 'Tamamlandı',
+    durumIptal: 'İptal',
+    tamamla: 'Tamamlandı',
+    iptalEt: 'İptal Et',
 
     // Risk Listesi
     riskAramaPlaceholder: 'Makine ara (ör. M-01)',
@@ -167,6 +171,10 @@ const dict = {
     durumOnaylananlar: 'Approved',
     durumReddedilenler: 'Rejected',
     durumTumu: 'All',
+    durumTamamlandi: 'Completed',
+    durumIptal: 'Cancelled',
+    tamamla: 'Complete',
+    iptalEt: 'Cancel',
 
     riskAramaPlaceholder: 'Search machine (e.g. M-01)',
 

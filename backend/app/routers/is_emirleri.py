@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -35,3 +35,41 @@ def list_is_emirleri(
         query = query.filter(IsEmri.durum == durum)
     is_emirleri = query.order_by(IsEmri.created_at.desc()).all()
     return [_to_out(i) for i in is_emirleri]
+
+
+def _get_bekleyen_is_emri(is_emri_id: int, db: Session) -> IsEmri:
+    is_emri = db.get(IsEmri, is_emri_id)
+    if is_emri is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Is emri bulunamadi")
+    if is_emri.durum != IsEmriDurum.bekliyor:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Bu is emri zaten sonuclandirilmis (durum: {is_emri.durum.value})",
+        )
+    return is_emri
+
+
+@router.post("/{is_emri_id}/tamamla", response_model=IsEmriOut)
+def tamamla(
+    is_emri_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    is_emri = _get_bekleyen_is_emri(is_emri_id, db)
+    is_emri.durum = IsEmriDurum.tamamlandi
+    db.commit()
+    db.refresh(is_emri)
+    return _to_out(is_emri)
+
+
+@router.post("/{is_emri_id}/iptal-et", response_model=IsEmriOut)
+def iptal_et(
+    is_emri_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    is_emri = _get_bekleyen_is_emri(is_emri_id, db)
+    is_emri.durum = IsEmriDurum.iptal
+    db.commit()
+    db.refresh(is_emri)
+    return _to_out(is_emri)

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import client, { getErrorMessage } from '../api/client'
 import { t } from '../stores/i18n'
 
@@ -9,6 +9,14 @@ const isEmirleri = ref([])
 const yukleniyor = ref(true)
 const hata = ref('')
 const sayfa = ref(1)
+const islemDurumu = reactive({}) // { [id]: { yapiliyor, hata } }
+
+const durumEtiketAnahtari = { bekliyor: 'durumBekliyor', tamamlandi: 'durumTamamlandi', iptal: 'durumIptal' }
+const durumRenk = {
+  bekliyor: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  tamamlandi: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+  iptal: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+}
 
 const toplamSayfa = computed(() => Math.max(1, Math.ceil(isEmirleri.value.length / SAYFA_BOYUTU)))
 const sayfalanmis = computed(() => {
@@ -16,16 +24,35 @@ const sayfalanmis = computed(() => {
   return isEmirleri.value.slice(baslangic, baslangic + SAYFA_BOYUTU)
 })
 
-onMounted(async () => {
+async function yukle() {
   try {
     const { data } = await client.get('/is-emirleri')
     isEmirleri.value = data
+    data.forEach((e) => {
+      if (!islemDurumu[e.id]) islemDurumu[e.id] = { yapiliyor: false, hata: '' }
+    })
   } catch (err) {
     hata.value = getErrorMessage(err, 'İş emirleri yüklenemedi.')
   } finally {
     yukleniyor.value = false
   }
-})
+}
+
+async function karaVer(isEmri, islem) {
+  const d = islemDurumu[isEmri.id]
+  d.hata = ''
+  d.yapiliyor = true
+  try {
+    await client.post(`/is-emirleri/${isEmri.id}/${islem}`)
+    await yukle()
+  } catch (err) {
+    d.hata = getErrorMessage(err, 'İşlem gerçekleştirilemedi.')
+  } finally {
+    d.yapiliyor = false
+  }
+}
+
+onMounted(yukle)
 </script>
 
 <template>
@@ -47,6 +74,7 @@ onMounted(async () => {
               <th class="px-4 py-2">{{ t('colOncelik') }}</th>
               <th class="px-4 py-2">{{ t('colDurum') }}</th>
               <th class="px-4 py-2">{{ t('colTarih') }}</th>
+              <th class="px-4 py-2"></th>
             </tr>
           </thead>
           <tbody>
@@ -55,8 +83,29 @@ onMounted(async () => {
               <td class="px-4 py-2">{{ e.aksiyon }}</td>
               <td class="px-4 py-2 text-slate-500 dark:text-slate-400">{{ e.parca_kodu }}</td>
               <td class="px-4 py-2">{{ e.oncelik }}</td>
-              <td class="px-4 py-2">{{ e.durum }}</td>
+              <td class="px-4 py-2">
+                <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="durumRenk[e.durum]">{{ t(durumEtiketAnahtari[e.durum]) }}</span>
+              </td>
               <td class="px-4 py-2 text-slate-500 dark:text-slate-400">{{ new Date(e.created_at).toLocaleString('tr-TR') }}</td>
+              <td class="px-4 py-2">
+                <div v-if="e.durum === 'bekliyor'" class="flex gap-2">
+                  <button
+                    @click="karaVer(e, 'tamamla')"
+                    :disabled="islemDurumu[e.id]?.yapiliyor"
+                    class="rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
+                  >
+                    {{ t('tamamla') }}
+                  </button>
+                  <button
+                    @click="karaVer(e, 'iptal-et')"
+                    :disabled="islemDurumu[e.id]?.yapiliyor"
+                    class="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-600 hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  >
+                    {{ t('iptalEt') }}
+                  </button>
+                </div>
+                <p v-if="islemDurumu[e.id]?.hata" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ islemDurumu[e.id].hata }}</p>
+              </td>
             </tr>
           </tbody>
         </table>
