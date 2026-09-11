@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import client, { getErrorMessage } from '../api/client'
 import { t } from '../stores/i18n'
+import { useSiralama } from '../composables/useSiralama'
 
 const SAYFA_BOYUTU = 20
 
@@ -11,6 +12,8 @@ const hata = ref('')
 const sayfa = ref(1)
 const islemDurumu = reactive({}) // { [id]: { yapiliyor, hata } }
 
+const { siralanmis, sirala } = useSiralama(isEmirleri)
+
 const durumEtiketAnahtari = { bekliyor: 'durumBekliyor', tamamlandi: 'durumTamamlandi', iptal: 'durumIptal' }
 const durumRenk = {
   bekliyor: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
@@ -18,11 +21,16 @@ const durumRenk = {
   iptal: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
 }
 
-const toplamSayfa = computed(() => Math.max(1, Math.ceil(isEmirleri.value.length / SAYFA_BOYUTU)))
+const toplamSayfa = computed(() => Math.max(1, Math.ceil(siralanmis.value.length / SAYFA_BOYUTU)))
 const sayfalanmis = computed(() => {
   const baslangic = (sayfa.value - 1) * SAYFA_BOYUTU
-  return isEmirleri.value.slice(baslangic, baslangic + SAYFA_BOYUTU)
+  return siralanmis.value.slice(baslangic, baslangic + SAYFA_BOYUTU)
 })
+
+function siralaVeBastaBasla(alan) {
+  sirala(alan)
+  sayfa.value = 1
+}
 
 async function yukle() {
   try {
@@ -68,12 +76,12 @@ onMounted(yukle)
         <table class="w-full text-left text-sm">
           <thead class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <tr>
-              <th class="px-4 py-2">{{ t('colMakine') }}</th>
-              <th class="px-4 py-2">{{ t('colAksiyon') }}</th>
-              <th class="px-4 py-2">{{ t('colParca') }}</th>
-              <th class="px-4 py-2">{{ t('colOncelik') }}</th>
-              <th class="px-4 py-2">{{ t('colDurum') }}</th>
-              <th class="px-4 py-2">{{ t('colTarih') }}</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('makine_kodu')">{{ t('colMakine') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('aksiyon')">{{ t('colAksiyon') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('parca_kodu')">{{ t('colParca') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('oncelik')">{{ t('colOncelik') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('durum')">{{ t('colDurum') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('created_at')">{{ t('colTarih') }} ⇅</th>
               <th class="px-4 py-2"></th>
             </tr>
           </thead>

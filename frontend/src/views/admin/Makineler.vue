@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import client, { getErrorMessage } from '../../api/client'
 import { t } from '../../stores/i18n'
+import { useSiralama } from '../../composables/useSiralama'
 
 const SAYFA_BOYUTU = 20
 
@@ -11,11 +12,18 @@ const hata = ref('')
 const kaydediliyor = ref(null)
 const sayfa = ref(1)
 
-const toplamSayfa = computed(() => Math.max(1, Math.ceil(makineler.value.length / SAYFA_BOYUTU)))
+const { siralanmis, sirala } = useSiralama(makineler)
+
+const toplamSayfa = computed(() => Math.max(1, Math.ceil(siralanmis.value.length / SAYFA_BOYUTU)))
 const sayfalanmis = computed(() => {
   const baslangic = (sayfa.value - 1) * SAYFA_BOYUTU
-  return makineler.value.slice(baslangic, baslangic + SAYFA_BOYUTU)
+  return siralanmis.value.slice(baslangic, baslangic + SAYFA_BOYUTU)
 })
+
+function siralaVeBastaBasla(alan) {
+  sirala(alan)
+  sayfa.value = 1
+}
 
 async function yukle() {
   yukleniyor.value = true
@@ -57,10 +65,10 @@ onMounted(yukle)
         <table class="w-full text-left text-sm">
           <thead class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <tr>
-              <th class="px-4 py-2">{{ t('colKod') }}</th>
-              <th class="px-4 py-2">{{ t('colAd') }}</th>
-              <th class="px-4 py-2">{{ t('colTip') }}</th>
-              <th class="px-4 py-2">{{ t('colKritiklik') }}</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('makine_kodu')">{{ t('colKod') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('ad')">{{ t('colAd') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('tip')">{{ t('colTip') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="siralaVeBastaBasla('kritiklik')">{{ t('colKritiklik') }} ⇅</th>
             </tr>
           </thead>
           <tbody>

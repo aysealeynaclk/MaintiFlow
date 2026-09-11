@@ -96,6 +96,7 @@ const dict = {
     sifre: 'Şifre',
     girisYap: 'Giriş Yap',
     girisYapiliyor: 'Giriş yapılıyor...',
+    beniHatirla: 'Beni Hatırla',
 
     // Profil
     profilBilgileri: 'Profil Bilgileri',
@@ -206,6 +207,7 @@ const dict = {
     sifre: 'Password',
     girisYap: 'Log In',
     girisYapiliyor: 'Logging in...',
+    beniHatirla: 'Remember me',
 
     profilBilgileri: 'Profile Info',
     yeniSifreOpsiyonel: 'New password (optional)',

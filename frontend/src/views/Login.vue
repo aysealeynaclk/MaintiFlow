@@ -10,6 +10,7 @@ const route = useRoute()
 
 const username = ref('')
 const password = ref('')
+const beniHatirla = ref(true)
 const hata = ref('')
 const yukleniyor = ref(false)
 
@@ -26,7 +27,7 @@ async function girisYap() {
       headers: { Authorization: `Bearer ${data.access_token}` },
     })
 
-    auth.setSession(data.access_token, me.data)
+    auth.setSession(data.access_token, me.data, beniHatirla.value)
     router.push(route.query.redirect || '/')
   } catch (err) {
     hata.value = getErrorMessage(err, 'Giriş başarısız, kullanıcı adı veya şifreyi kontrol edin.')
@@ -59,6 +60,11 @@ async function girisYap() {
           class="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         />
       </div>
+
+      <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <input v-model="beniHatirla" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-sky-600 dark:border-slate-600" />
+        {{ t('beniHatirla') }}
+      </label>
 
       <p v-if="hata" class="text-sm text-red-600 dark:text-red-400">{{ hata }}</p>
 

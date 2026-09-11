@@ -94,10 +94,22 @@ def create_tahmin(
     return _to_out(tahmin)
 
 
+_SIRALAMA_SUTUNLARI = {
+    "makine_kodu": Makine.makine_kodu,
+    "ariza_tipi": Tahmin.ariza_tipi,
+    "risk_orani": Tahmin.risk_orani,
+    "oncelik": Tahmin.oncelik,
+    "durum": Tahmin.durum,
+    "created_at": Tahmin.created_at,
+}
+
+
 @router.get("", response_model=TahminListResponse)
 def list_tahminler(
     durum: TahminDurum | None = None,
     makine_kodu: str | None = None,
+    sort_by: str | None = None,
+    sort_dir: str = "desc",
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -110,12 +122,15 @@ def list_tahminler(
         query = query.filter(Makine.makine_kodu.ilike(f"%{makine_kodu}%"))
 
     total = query.count()
-    tahminler = (
-        query.order_by(Tahmin.oncelik.desc(), Tahmin.risk_orani.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-        .all()
-    )
+
+    sutun = _SIRALAMA_SUTUNLARI.get(sort_by)
+    if sutun is not None:
+        siralama = sutun.desc() if sort_dir == "desc" else sutun.asc()
+        query = query.order_by(siralama)
+    else:
+        query = query.order_by(Tahmin.oncelik.desc(), Tahmin.risk_orani.desc())
+
+    tahminler = query.offset((page - 1) * page_size).limit(page_size).all()
     return TahminListResponse(
         items=[_to_out(t) for t in tahminler],
         total=total,

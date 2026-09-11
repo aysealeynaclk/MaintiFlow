@@ -89,9 +89,7 @@ function cikisYap() {
 
           <div class="border-t border-slate-100 px-4 py-2.5 dark:border-slate-700">
             <div class="flex items-center justify-between">
-              <span class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                <span>☀️</span> {{ t('gorunum') }}
-              </span>
+              <span class="text-sm text-slate-700 dark:text-slate-200">{{ t('gorunum') }}</span>
               <div class="flex rounded-full border border-slate-300 p-0.5 text-xs dark:border-slate-600">
                 <button
                   @click="theme.dark = false"
@@ -113,9 +111,7 @@ function cikisYap() {
 
           <div class="px-4 py-2.5">
             <div class="flex items-center justify-between">
-              <span class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                <span>🌐</span> {{ t('dil') }}
-              </span>
+              <span class="text-sm text-slate-700 dark:text-slate-200">{{ t('dil') }}</span>
               <div class="flex rounded-full border border-slate-300 p-0.5 text-xs dark:border-slate-600">
                 <button
                   @click="i18n.setLocale('tr')"
@@ -136,11 +132,11 @@ function cikisYap() {
           </div>
 
           <div class="border-t border-slate-100 dark:border-slate-700">
-            <button @click="profileGit" class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
-              <span>👤</span> {{ t('profilim') }}
+            <button @click="profileGit" class="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
+              {{ t('profilim') }}
             </button>
-            <button @click="cikisYap" class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
-              <span>🚪</span> {{ t('cikisYap') }}
+            <button @click="cikisYap" class="block w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
+              {{ t('cikisYap') }}
             </button>
           </div>
         </div>

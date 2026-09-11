@@ -14,6 +14,8 @@ const arama = ref('')
 const yukleniyor = ref(true)
 const hata = ref('')
 const secilenId = ref(null)
+const siralamaAlan = ref(null)
+const siralamaYon = ref('desc')
 
 const toplamSayfa = computed(() => Math.max(1, Math.ceil(toplam.value / SAYFA_BOYUTU)))
 
@@ -39,6 +41,7 @@ async function yukle(sessiz = false) {
       page_size: SAYFA_BOYUTU,
       ...(durum.value ? { durum: durum.value } : {}),
       ...(arama.value ? { makine_kodu: arama.value } : {}),
+      ...(siralamaAlan.value ? { sort_by: siralamaAlan.value, sort_dir: siralamaYon.value } : {}),
     }
     const { data } = await client.get('/tahminler', { params })
     tahminler.value = data.items
@@ -83,6 +86,17 @@ function sonrakiSayfa() {
 function oncekiSayfa() {
   if (sayfa.value > 1) sayfa.value--
 }
+
+function sirala(alan) {
+  if (siralamaAlan.value === alan) {
+    siralamaYon.value = siralamaYon.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    siralamaAlan.value = alan
+    siralamaYon.value = 'asc'
+  }
+  sayfa.value = 1
+  yukle()
+}
 </script>
 
 <template>
@@ -114,12 +128,12 @@ function oncekiSayfa() {
         <table class="w-full text-left text-sm">
           <thead class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <tr>
-              <th class="px-4 py-2">{{ t('colMakine') }}</th>
-              <th class="px-4 py-2">{{ t('colArizaTipi') }}</th>
-              <th class="px-4 py-2">{{ t('colRisk') }}</th>
-              <th class="px-4 py-2">{{ t('colOncelik') }}</th>
-              <th class="px-4 py-2">{{ t('colDurum') }}</th>
-              <th class="px-4 py-2">{{ t('colTarih') }}</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="sirala('makine_kodu')">{{ t('colMakine') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="sirala('ariza_tipi')">{{ t('colArizaTipi') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="sirala('risk_orani')">{{ t('colRisk') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="sirala('oncelik')">{{ t('colOncelik') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="sirala('durum')">{{ t('colDurum') }} ⇅</th>
+              <th class="cursor-pointer select-none px-4 py-2" @click="sirala('created_at')">{{ t('colTarih') }} ⇅</th>
             </tr>
           </thead>
           <tbody>
