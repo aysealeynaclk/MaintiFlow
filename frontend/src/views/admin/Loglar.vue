@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import client, { getErrorMessage } from '../../api/client'
 import { t } from '../../stores/i18n'
 import { useSiralama } from '../../composables/useSiralama'
@@ -10,6 +10,47 @@ const loglar = ref([])
 const yukleniyor = ref(true)
 const hata = ref('')
 const sayfa = ref(1)
+
+const replaySleep = ref(0.3)
+const replayLimit = ref(200)
+const replayDurum = ref({ calisiyor: false, islenen: 0, toplam: 0, uyari: 0 })
+const replayHata = ref('')
+const replayBaslatiliyor = ref(false)
+let replayZamanlayici = null
+
+async function replayDurumGetir() {
+  try {
+    const { data } = await client.get('/admin/replay/durum')
+    replayDurum.value = data
+    if (!data.calisiyor && replayZamanlayici) {
+      clearInterval(replayZamanlayici)
+      replayZamanlayici = null
+      await yukle()
+    }
+  } catch {
+    // sessizce gec, bir sonraki tikte tekrar denenir
+  }
+}
+
+async function replayBaslatTikla() {
+  replayHata.value = ''
+  replayBaslatiliyor.value = true
+  try {
+    await client.post('/admin/replay/baslat', null, {
+      params: { sleep: replaySleep.value, limit: replayLimit.value },
+    })
+    await replayDurumGetir()
+    if (!replayZamanlayici) {
+      replayZamanlayici = setInterval(replayDurumGetir, 1000)
+    }
+  } catch (err) {
+    replayHata.value = getErrorMessage(err, 'Replay başlatılamadı.')
+  } finally {
+    replayBaslatiliyor.value = false
+  }
+}
+
+onUnmounted(() => clearInterval(replayZamanlayici))
 
 const { siralanmis, sirala } = useSiralama(loglar)
 
@@ -24,7 +65,7 @@ function siralaVeBastaBasla(alan) {
   sayfa.value = 1
 }
 
-onMounted(async () => {
+async function yukle() {
   try {
     const { data } = await client.get('/admin/loglar')
     loglar.value = data
@@ -33,12 +74,64 @@ onMounted(async () => {
   } finally {
     yukleniyor.value = false
   }
+}
+
+onMounted(async () => {
+  await yukle()
+  await replayDurumGetir()
+  if (replayDurum.value.calisiyor) {
+    replayZamanlayici = setInterval(replayDurumGetir, 1000)
+  }
 })
 </script>
 
 <template>
   <div>
     <h1 class="mb-4 text-xl font-semibold text-slate-900 dark:text-white">{{ t('loglar') }}</h1>
+
+    <div class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <div>
+        <label class="mb-1 block text-xs text-slate-500 dark:text-slate-400">{{ t('replaySleepLabel') }}</label>
+        <input
+          v-model.number="replaySleep"
+          type="number"
+          min="0"
+          max="5"
+          step="0.1"
+          :disabled="replayDurum.calisiyor"
+          class="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-500 dark:text-slate-400">{{ t('replayLimitLabel') }}</label>
+        <input
+          v-model.number="replayLimit"
+          type="number"
+          min="1"
+          max="10000"
+          :disabled="replayDurum.calisiyor"
+          class="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        />
+      </div>
+      <button
+        @click="replayBaslatTikla"
+        :disabled="replayBaslatiliyor || replayDurum.calisiyor"
+        class="rounded-md bg-sky-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60"
+      >
+        {{ replayBaslatiliyor ? t('replayBaslatiliyor') : t('replayBaslat') }}
+      </button>
+
+      <span class="flex items-center gap-1.5 text-sm">
+        <span class="h-2 w-2 rounded-full" :class="replayDurum.calisiyor ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'"></span>
+        <span v-if="replayDurum.calisiyor" class="text-slate-600 dark:text-slate-300">
+          {{ t('replayCalisiyorEtiket') }}: {{ replayDurum.islenen }}/{{ replayDurum.toplam }} — {{ replayDurum.uyari }} {{ t('replayUyariKelimesi') }}
+        </span>
+        <span v-else class="text-slate-400 dark:text-slate-500">{{ t('replayBostaEtiket') }}</span>
+      </span>
+
+      <p v-if="replayHata" class="w-full text-sm text-red-600 dark:text-red-400">{{ replayHata }}</p>
+    </div>
+
     <p v-if="hata" class="text-sm text-red-600 dark:text-red-400">{{ hata }}</p>
     <p v-else-if="yukleniyor" class="text-sm text-slate-500 dark:text-slate-400">{{ t('yukleniyor') }}</p>
 

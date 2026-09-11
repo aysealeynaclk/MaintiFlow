@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app import replay_service
 from app.database import get_db
 from app.deps import require_admin
 from app.models import IsEmri, IsEmriDurum, Makine, Stok, Tahmin, TahminDurum, User, UserRole, UserStatus
@@ -202,3 +203,24 @@ def delete_kullanici(
             status_code=status.HTTP_409_CONFLICT,
             detail="Bu kullanici onayladigi/reddettigi kayitlar oldugu icin silinemez",
         )
+
+
+# --- Replay (demo veri akisi) ---
+
+
+@router.post("/replay/baslat")
+def replay_baslat(sleep: float = 0.3, limit: int = 200):
+    if not (0 <= sleep <= 5):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="sleep 0-5 saniye arasinda olmali")
+    if not (1 <= limit <= 10000):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="limit 1-10000 arasinda olmali")
+
+    basladi = replay_service.replay_baslat(sleep_saniye=sleep, limit=limit)
+    if not basladi:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Replay zaten calisiyor")
+    return {"mesaj": "Replay baslatildi"}
+
+
+@router.get("/replay/durum")
+def replay_durum():
+    return replay_service.durum_getir()

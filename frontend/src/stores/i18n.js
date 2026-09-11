@@ -82,6 +82,14 @@ const dict = {
     adet: 'adet',
     onayla: 'Onayla',
     reddet: 'Reddet',
+    modelDegerlendirmesi: 'Model Değerlendirmesi',
+    replayBaslat: 'Replay Başlat',
+    replayBaslatiliyor: 'Başlatılıyor...',
+    replaySleepLabel: 'Bekleme (sn)',
+    replayLimitLabel: 'Satır sayısı',
+    replayCalisiyorEtiket: 'Çalışıyor',
+    replayBostaEtiket: 'Boşta',
+    replayUyariKelimesi: 'uyarı',
 
     // Is Emirleri
     isEmriYok: 'Henüz onaylanmış bir iş emri yok.',
@@ -196,6 +204,14 @@ const dict = {
     adet: 'units',
     onayla: 'Approve',
     reddet: 'Reject',
+    modelDegerlendirmesi: 'Model Evaluation',
+    replayBaslat: 'Start Replay',
+    replayBaslatiliyor: 'Starting...',
+    replaySleepLabel: 'Delay (sec)',
+    replayLimitLabel: 'Row count',
+    replayCalisiyorEtiket: 'Running',
+    replayBostaEtiket: 'Idle',
+    replayUyariKelimesi: 'warnings',
 
     isEmriYok: 'No approved work orders yet.',
 

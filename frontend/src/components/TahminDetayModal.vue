@@ -7,6 +7,16 @@ const emit = defineEmits(['kapat', 'guncellendi'])
 
 const { tahmin, yukleniyor, hata, islemYapiliyor, islemHata, karaVer } = useTahminDetay(props.id)
 
+const modelGorselleri = [
+  { dosya: 'shap_summary.png', baslik: 'SHAP Özellik Önemi' },
+  { dosya: 'feature_importance.png', baslik: 'Özellik Önem Sıralaması' },
+  { dosya: 'confusion_matrix.png', baslik: 'Confusion Matrix' },
+  { dosya: 'pr_curve.png', baslik: 'Precision-Recall Eğrisi' },
+  { dosya: 'threshold_confusion_matrix.png', baslik: 'Eşik=0.60 Confusion Matrix' },
+  { dosya: 'eda_class_balance.png', baslik: 'Sınıf Dengesizliği' },
+  { dosya: 'eda_sensor_distributions.png', baslik: 'Sensör Dağılımları' },
+]
+
 async function tikla(islem) {
   const basarili = await karaVer(islem)
   if (basarili) {
@@ -62,6 +72,25 @@ async function tikla(islem) {
             </span>
           </p>
         </div>
+
+        <details class="rounded-lg border border-slate-200 dark:border-slate-800">
+          <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+            {{ t('modelDegerlendirmesi') }}
+          </summary>
+          <div class="grid grid-cols-2 gap-3 border-t border-slate-100 p-4 dark:border-slate-800">
+            <a
+              v-for="g in modelGorselleri"
+              :key="g.dosya"
+              :href="`/gorseller/${g.dosya}`"
+              target="_blank"
+              rel="noopener"
+              class="block"
+            >
+              <img :src="`/gorseller/${g.dosya}`" :alt="g.baslik" class="w-full rounded-md border border-slate-200 dark:border-slate-700" />
+              <p class="mt-1 text-center text-xs text-slate-500 dark:text-slate-400">{{ g.baslik }}</p>
+            </a>
+          </div>
+        </details>
 
         <p v-if="islemHata" class="text-sm text-red-600 dark:text-red-400">{{ islemHata }}</p>
 
