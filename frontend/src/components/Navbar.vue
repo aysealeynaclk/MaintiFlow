@@ -33,7 +33,7 @@ function cikisYap() {
 <template>
   <nav class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
     <div class="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
-      <span class="text-lg font-semibold text-slate-900 dark:text-white">MaintiFlow</span>
+      <RouterLink to="/" class="text-lg font-semibold text-slate-900 dark:text-white">MaintiFlow</RouterLink>
 
       <div class="flex flex-1 gap-4 text-sm">
         <RouterLink to="/" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import client, { getErrorMessage } from '../api/client'
 import { auth } from '../stores/auth'
+import { t } from '../stores/i18n'
 
 const router = useRouter()
 const route = useRoute()
@@ -41,7 +42,7 @@ async function girisYap() {
 
     <form @submit.prevent="girisYap" class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div>
-        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">Kullanıcı adı</label>
+        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">{{ t('kullaniciAdi') }}</label>
         <input
           v-model="username"
           type="text"
@@ -50,7 +51,7 @@ async function girisYap() {
         />
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">Şifre</label>
+        <label class="mb-1 block text-sm text-slate-600 dark:text-slate-300">{{ t('sifre') }}</label>
         <input
           v-model="password"
           type="password"
@@ -66,7 +67,7 @@ async function girisYap() {
         :disabled="yukleniyor"
         class="w-full rounded-md bg-sky-600 py-2 font-medium text-white hover:bg-sky-700 disabled:opacity-60"
       >
-        {{ yukleniyor ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
+        {{ yukleniyor ? t('girisYapiliyor') : t('girisYap') }}
       </button>
     </form>
   </div>

@@ -13,10 +13,9 @@ watchEffect(() => {
   localStorage.setItem('maintiflow_locale', i18n.locale)
 })
 
-// Not: su an sadece ust menu, profil ve kullanici yonetimi sayfalari
-// cevriliyor - uygulamanin geri kalani henuz TR-only.
 const dict = {
   tr: {
+    // Navbar / genel
     riskListesi: 'Risk Listesi',
     isEmirleri: 'İş Emirleri',
     makineler: 'Makineler',
@@ -29,16 +28,82 @@ const dict = {
     dil: 'Dil',
     acik: 'Açık',
     koyu: 'Koyu',
-    profilBilgileri: 'Profil Bilgileri',
+    yukleniyor: 'Yükleniyor...',
+    kayitYok: 'Kayıt yok.',
+
+    // Ortak tablo sutunlari
+    colMakine: 'Makine',
+    colArizaTipi: 'Arıza Tipi',
+    colRisk: 'Risk',
+    colOncelik: 'Öncelik',
+    colDurum: 'Durum',
+    colTarih: 'Tarih',
+    colAksiyon: 'Aksiyon',
+    colParca: 'Parça',
+    colKarar: 'Karar',
+    colKararVeren: 'Karar Veren',
+    colKod: 'Kod',
+    colAd: 'Ad',
+    colTip: 'Tip',
+    colKritiklik: 'Kritiklik (1-5)',
+    colParcaKodu: 'Parça Kodu',
+    colAdet: 'Adet',
+    colTedarikGun: 'Tedarik (gün)',
+
+    // Ortak sayfalama
+    toplam: 'Toplam',
+    kayit: 'kayıt',
+    oncekiSayfa: '‹ Önceki',
+    sonrakiSayfa: 'Sonraki ›',
+    sayfa: 'Sayfa',
+
+    // Durum etiketleri
+    durumBekliyor: 'Bekliyor',
+    durumOnaylandi: 'Onaylandı',
+    durumReddedildi: 'Reddedildi',
+    durumBekleyenler: 'Bekleyenler',
+    durumOnaylananlar: 'Onaylananlar',
+    durumReddedilenler: 'Reddedilenler',
+    durumTumu: 'Tümü',
+
+    // Risk Listesi
+    riskAramaPlaceholder: 'Makine ara (ör. M-01)',
+
+    // Detay (kart/modal)
+    tahminDetayi: 'Tahmin Detayı',
+    tahminGerekcesi: 'Tahmin Gerekçesi',
+    onerilenAksiyon: 'Önerilen Aksiyon',
+    gerekliParca: 'Gerekli parça',
+    stokta: 'Stokta',
+    adet: 'adet',
+    onayla: 'Onayla',
+    reddet: 'Reddet',
+
+    // Is Emirleri
+    isEmriYok: 'Henüz onaylanmış bir iş emri yok.',
+
+    // Admin - Makineler / Stok
+    makineYonetimi: 'Makine Yönetimi',
+    stokYonetimi: 'Stok Yönetimi',
+    kaydet: 'Kaydet',
+
+    // Login
     kullaniciAdi: 'Kullanıcı adı',
+    sifre: 'Şifre',
+    girisYap: 'Giriş Yap',
+    girisYapiliyor: 'Giriş yapılıyor...',
+
+    // Profil
+    profilBilgileri: 'Profil Bilgileri',
     yeniSifreOpsiyonel: 'Yeni şifre (opsiyonel)',
     yeniSifreTekrar: 'Yeni şifre (tekrar)',
     mevcutSifreOnay: 'Mevcut şifre (onay için gerekli)',
     goster: 'Göster',
     gizle: 'Gizle',
-    kaydet: 'Kaydet',
     kaydediliyor: 'Kaydediliyor...',
     rol: 'Rol',
+
+    // Admin - Kullanicilar
     kullaniciYonetimi: 'Kullanıcı Yönetimi',
     yeniKullanici: 'Yeni Kullanıcı',
     kullaniciOlustur: 'Kullanıcı Oluştur',
@@ -50,16 +115,10 @@ const dict = {
     durumBaslik: 'DURUM',
     kayitTarihiBaslik: 'KAYIT TARİHİ',
     islemlerBaslik: 'İŞLEMLER',
-    sifre: 'Şifre',
     pasifeAl: 'Pasife Al',
     aktifEt: 'Aktif Et',
     sil: 'Sil',
     adminKorunuyor: 'admin hesabı korunuyor',
-    toplam: 'Toplam',
-    kayit: 'kayıt',
-    oncekiSayfa: '‹ Önceki',
-    sonrakiSayfa: 'Sonraki ›',
-    sayfa: 'Sayfa',
   },
   en: {
     riskListesi: 'Risk List',
@@ -74,16 +133,72 @@ const dict = {
     dil: 'Language',
     acik: 'Light',
     koyu: 'Dark',
-    profilBilgileri: 'Profile Info',
+    yukleniyor: 'Loading...',
+    kayitYok: 'No records.',
+
+    colMakine: 'Machine',
+    colArizaTipi: 'Failure Type',
+    colRisk: 'Risk',
+    colOncelik: 'Priority',
+    colDurum: 'Status',
+    colTarih: 'Date',
+    colAksiyon: 'Action',
+    colParca: 'Part',
+    colKarar: 'Decision',
+    colKararVeren: 'Decided By',
+    colKod: 'Code',
+    colAd: 'Name',
+    colTip: 'Type',
+    colKritiklik: 'Criticality (1-5)',
+    colParcaKodu: 'Part Code',
+    colAdet: 'Qty',
+    colTedarikGun: 'Lead Time (days)',
+
+    toplam: 'Total',
+    kayit: 'records',
+    oncekiSayfa: '‹ Previous',
+    sonrakiSayfa: 'Next ›',
+    sayfa: 'Page',
+
+    durumBekliyor: 'Pending',
+    durumOnaylandi: 'Approved',
+    durumReddedildi: 'Rejected',
+    durumBekleyenler: 'Pending',
+    durumOnaylananlar: 'Approved',
+    durumReddedilenler: 'Rejected',
+    durumTumu: 'All',
+
+    riskAramaPlaceholder: 'Search machine (e.g. M-01)',
+
+    tahminDetayi: 'Prediction Detail',
+    tahminGerekcesi: 'Prediction Reasoning',
+    onerilenAksiyon: 'Recommended Action',
+    gerekliParca: 'Required part',
+    stokta: 'In stock',
+    adet: 'units',
+    onayla: 'Approve',
+    reddet: 'Reject',
+
+    isEmriYok: 'No approved work orders yet.',
+
+    makineYonetimi: 'Machine Management',
+    stokYonetimi: 'Stock Management',
+    kaydet: 'Save',
+
     kullaniciAdi: 'Username',
+    sifre: 'Password',
+    girisYap: 'Log In',
+    girisYapiliyor: 'Logging in...',
+
+    profilBilgileri: 'Profile Info',
     yeniSifreOpsiyonel: 'New password (optional)',
     yeniSifreTekrar: 'New password (repeat)',
     mevcutSifreOnay: 'Current password (required to confirm)',
     goster: 'Show',
     gizle: 'Hide',
-    kaydet: 'Save',
     kaydediliyor: 'Saving...',
     rol: 'Role',
+
     kullaniciYonetimi: 'User Management',
     yeniKullanici: 'New User',
     kullaniciOlustur: 'Create User',
@@ -95,16 +210,10 @@ const dict = {
     durumBaslik: 'STATUS',
     kayitTarihiBaslik: 'REGISTERED',
     islemlerBaslik: 'ACTIONS',
-    sifre: 'Password',
     pasifeAl: 'Deactivate',
     aktifEt: 'Activate',
     sil: 'Delete',
     adminKorunuyor: 'admin account protected',
-    toplam: 'Total',
-    kayit: 'records',
-    oncekiSayfa: '‹ Previous',
-    sonrakiSayfa: 'Next ›',
-    sayfa: 'Page',
   },
 }
 
